@@ -6,5 +6,10 @@ public class General extends Piece{
     private static final double pieceValue = 5;
     public General(int x, int y, boolean black){
         super(x, y, pieceValue, black, moveset, name);
+        if(black){
+            this.spriteString = "src/main/resources/XXLChess/b-knight-king.png";
+        }else{
+            this.spriteString = "src/main/resources/XXLChess/w-knight-king.png";
+        }
     }
 }

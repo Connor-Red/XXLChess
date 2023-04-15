@@ -6,5 +6,10 @@ public class Queen extends Piece{
     private static final double pieceValue = 9.5;
     public Queen(int x, int y, boolean black){
         super(x, y, pieceValue, black, moveset, name);
+        if(black){
+            this.spriteString = "src/main/resources/XXLChess/b-queen.png";
+        }else{
+            this.spriteString = "src/main/resources/XXLChess/w-queen.png";
+        }
     }
 }

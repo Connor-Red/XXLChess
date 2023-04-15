@@ -6,5 +6,10 @@ public class Rook extends Piece{
     private static final double pieceValue = 5.25;
     public Rook(int x, int y, boolean black){
         super(x, y, pieceValue, black, moveset, name);
+        if(black){
+            this.spriteString = "src/main/resources/XXLChess/b-rook.png";
+        }else{
+            this.spriteString = "src/main/resources/XXLChess/w-rook.png";
+        }
     }
 }

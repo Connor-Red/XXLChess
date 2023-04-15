@@ -9,6 +9,7 @@ public abstract class Piece{
     protected double pieceValue;
     protected boolean black; // white = false, black = true
     private PImage sprite;
+    protected String spriteString;
     /*
      * Moveset is a array of ints that determine the moves the piece can make
      * 
@@ -51,6 +52,14 @@ public abstract class Piece{
 
     public void setSprite(PImage sprite) {
         this.sprite = sprite;
+    }
+
+    public String getSpriteString(){
+        return this.spriteString;
+    }
+
+    public PImage getSprite(){
+        return this.sprite;
     }
 
     public void tick(){

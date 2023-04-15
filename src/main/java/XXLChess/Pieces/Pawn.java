@@ -6,5 +6,10 @@ public class Pawn extends Piece{
     private static final double pieceValue = 1;
     public Pawn(int x, int y, boolean black){
         super(x, y, pieceValue, black, moveset, name);
+        if(black){
+            this.spriteString = "src/main/resources/XXLChess/b-pawn.png";
+        }else{
+            this.spriteString = "src/main/resources/XXLChess/w-pawn.png";
+        }
     }
 }

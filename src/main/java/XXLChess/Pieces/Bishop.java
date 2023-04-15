@@ -6,5 +6,10 @@ public class Bishop extends Piece{
     private static final double pieceValue = 3.625;
     public Bishop(int x, int y, boolean black){
         super(x, y, pieceValue, black, moveset, name);
+        if(black){
+            this.spriteString = "src/main/resources/XXLChess/b-bishop.png";
+        }else{
+            this.spriteString = "src/main/resources/XXLChess/w-bishop.png";
+        }
     }
 }
