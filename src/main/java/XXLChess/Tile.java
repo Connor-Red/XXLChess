@@ -13,15 +13,15 @@ public class Tile{
     protected int status;
     protected int[] center = new int[2];
     protected Piece heldPiece;
-    private static final String DARK_BROWN = "B58863";
-    private static final String LIGHT_BROWN = "F0D9B5";
-    private static final String DARK_BLUE = "AAD2DD";
-    private static final String LIGHT_BLUE = "C4E0E8";
-    private static final String SELECTION_GREEN = "698A4C";
-    private static final String LIGHT_GREEN = "CDD26A";
-    private static final String DARK_GREEN = "AAA23A";
-    private static final String LIGHT_RED = "FFA466";
-    private static final String DARK_RED = "FF0000";
+    private static final int DARK_BROWN = 0xFFB58863;
+    private static final int LIGHT_BROWN = 0xFFF0D9B5;
+    private static final String DARK_BLUE = "#AAD2DD";
+    private static final String LIGHT_BLUE = "#C4E0E8";
+    private static final String SELECTION_GREEN = "#698A4C";
+    private static final String LIGHT_GREEN = "#CDD26A";
+    private static final String DARK_GREEN = "#AAA23A";
+    private static final String LIGHT_RED = "#FFA466";
+    private static final String DARK_RED = "#FF0000";
 
     public Tile(int cellSize, int x, int y, boolean dark){
         this.cellSize = cellSize;
@@ -68,9 +68,9 @@ public class Tile{
         switch(this.status){
             case 0:
                 if(this.dark){
-                    app.fill(PApplet.unhex(DARK_BROWN));
+                    app.fill(DARK_BROWN);
                 }else{
-                    app.fill(PApplet.unhex(LIGHT_BROWN));
+                    app.fill(LIGHT_BROWN);
                 }
                 break;
             case 1:

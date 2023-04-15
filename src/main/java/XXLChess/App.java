@@ -28,7 +28,6 @@ public class App extends PApplet {
 
     protected Tile[][] board;
     protected Piece selPiece;
-tiles
     public static final int FPS = 60;
 	
     public String configPath;
@@ -36,23 +35,28 @@ tiles
     public App() {
         this.configPath = "config.json";
         this.board = new Tile[BOARD_WIDTH][BOARD_WIDTH];
-        boolean dark = true;
+        boolean dark;
         for(int i = 0; i < BOARD_WIDTH; i++){
+            if((i%2) == 0){
+                dark = true;
+            }else{
+                dark = false;
+            }
             for(int j = 0; j < BOARD_WIDTH; j++){
                 if(dark){
                     dark = false;
                 }else{
                     dark = true;
                 }
-                board[i][j] = new Tile(CELLSIZE, i * CELLSIZE, j * CELLSIZE, dark);
+                board[j][i] = new Tile(CELLSIZE, i * CELLSIZE, j * CELLSIZE, dark);
             }
         }
-        // Placing pieces
-        
+
+        // placing pieces
         // Placing rooks
         board[0][0].updatePiece(new Rook(board[0][0].getX(), board[0][0].getY(), true));
-        board[13][0].updatePiece(new Rook(board[13][0].getX(), board[13][0].getY(), true));
-        board[0][13].updatePiece(new Rook(board[0][13].getX(), board[0][13].getY(), false));
+        board[0][13].updatePiece(new Rook(board[0][13].getX(), board[0][13].getY(), true));
+        board[13][0].updatePiece(new Rook(board[13][0].getX(), board[13][0].getY(), false));
         board[13][13].updatePiece(new Rook(board[13][13].getX(), board[13][13].getY(), false));
 
         // Placing Knights
@@ -101,6 +105,7 @@ tiles
             board[12][i].updatePiece(new Pawn(board[12][i].getX(), board[12][i].getY(), false));
         }
     }
+
 
     /**
      * Initialise the setting of the window size.
@@ -164,7 +169,7 @@ tiles
      * Draw all elements in the game by current frame. 
     */
     public void draw() {
-        background(20, 20, 20);
+        background(200, 200, 200);
         for(int i = 0; i < BOARD_WIDTH; i++){
             for(int j = 0; j < BOARD_WIDTH; j++){
                 this.board[i][j].draw(this);
