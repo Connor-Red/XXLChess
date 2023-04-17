@@ -76,5 +76,9 @@ public abstract class Piece{
         app.image(this.sprite, this.x, this.y);
     }
 
+    public String getPieceName() {
+        return pieceName;
+    }
+
     
 }

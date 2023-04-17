@@ -9,6 +9,7 @@ public class Tile{
     private int y;
     private int xPos;
     private int yPos;
+    private int prevStatus;
     protected int cellSize;
     // light or dark colour, true = dark, false = light
     protected boolean dark;
@@ -19,6 +20,7 @@ public class Tile{
     protected ArrayList<Tile> attackedWhite;
     protected ArrayList<Tile> moves;
     protected ArrayList<Tile> attackable;
+    protected String tileName;
 
     private static final int DARK_BROWN = 0xFFB58863;
     private static final int LIGHT_BROWN = 0xFFF0D9B5;
@@ -32,12 +34,13 @@ public class Tile{
 
     public Tile(int cellSize, int x, int y, boolean dark){
         this.cellSize = cellSize;
-        this.x = x * cellSize;
-        this.y = y * cellSize;
         this.xPos = x;
         this.yPos = y;
+        this.x = x * cellSize;
+        this.y = y * cellSize;
         this.dark = dark;
         this.status = 0;
+        this.prevStatus = 0;
         this.attackedBlack = new ArrayList<Tile>();
         this.attackedWhite = new ArrayList<Tile>();
         this.moves = new ArrayList<Tile>();
@@ -49,6 +52,7 @@ public class Tile{
     }
 
     public void updateStatus(int i){
+        this.prevStatus = this.status;
         this.status = i;
     }
 
@@ -70,6 +74,10 @@ public class Tile{
 
     public int getStatus() {
         return status;
+    }
+
+    public void prevStatus(){
+        status = prevStatus;
     }
 
     public Piece getHeldPiece() {
@@ -108,6 +116,10 @@ public class Tile{
 
     public ArrayList<Tile> getMoves(){
         return this.moves;
+    }
+
+    public ArrayList<Tile> getAttackable(){
+        return this.attackable;
     }
 
     // returns the difference in value of the attackable piece vs current piece
