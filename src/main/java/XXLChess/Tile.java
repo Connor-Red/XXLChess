@@ -1,35 +1,47 @@
 package XXLChess;
 
 import processing.core.PApplet;
-import XXLChess.Pieces.*;;
+import XXLChess.Pieces.*;
+import java.util.ArrayList;
 
 public class Tile{
     private int x;
     private int y;
+    private int xPos;
+    private int yPos;
     protected int cellSize;
     // light or dark colour, true = dark, false = light
     protected boolean dark;
     // 0 = default, 1 = highlighted with move, 2 = previous move, 3 = selected, 4 = threatened, 5 = check
     protected int status;
-    protected int[] center = new int[2];
     protected Piece heldPiece;
+    protected ArrayList<Tile> attackedBlack;
+    protected ArrayList<Tile> attackedWhite;
+    protected ArrayList<Tile> moves;
+    protected ArrayList<Tile> attackable;
+
     private static final int DARK_BROWN = 0xFFB58863;
     private static final int LIGHT_BROWN = 0xFFF0D9B5;
-    private static final String DARK_BLUE = "#AAD2DD";
-    private static final String LIGHT_BLUE = "#C4E0E8";
-    private static final String SELECTION_GREEN = "#698A4C";
-    private static final String LIGHT_GREEN = "#CDD26A";
-    private static final String DARK_GREEN = "#AAA23A";
-    private static final String LIGHT_RED = "#FFA466";
-    private static final String DARK_RED = "#FF0000";
+    private static final int DARK_BLUE = 0xFFAAD2DD;
+    private static final int LIGHT_BLUE = 0xFFC4E0E8;
+    private static final int SELECTION_GREEN = 0xFF698A4C;
+    private static final int LIGHT_GREEN = 0xFFCDD26A;
+    private static final int DARK_GREEN = 0xFFAAA23A;
+    private static final int LIGHT_RED = 0xFFFFA466;
+    private static final int DARK_RED = 0xFFFF0000;
 
     public Tile(int cellSize, int x, int y, boolean dark){
         this.cellSize = cellSize;
-        this.x = x;
-        this.y = y;
+        this.x = x * cellSize;
+        this.y = y * cellSize;
+        this.xPos = x;
+        this.yPos = y;
         this.dark = dark;
         this.status = 0;
-        this.center = new int[] {(x + (cellSize/2)), (y + (cellSize/2))};
+        this.attackedBlack = new ArrayList<Tile>();
+        this.attackedWhite = new ArrayList<Tile>();
+        this.moves = new ArrayList<Tile>();
+        this.attackable = new ArrayList<Tile>();
     }
 
     public void updatePiece(Piece pc){
@@ -48,12 +60,12 @@ public class Tile{
         return this.y;
     }
 
-    public int getCenterX(){
-        return this.center[0];
+    public int getXPos(){
+        return this.xPos;
     }
 
-    public int getCenterY(){
-        return this.center[1];
+    public int getYPos(){
+        return this.yPos;
     }
 
     public int getStatus() {
@@ -62,6 +74,45 @@ public class Tile{
 
     public Piece getHeldPiece() {
         return heldPiece;
+    }
+
+    public void addAttackedBy(Tile t){
+        if(t.getHeldPiece().isBlack()){
+            attackedBlack.add(t);
+        }else{
+            attackedWhite.add(t);
+        }
+        
+    }
+
+    public ArrayList<Tile> getAttackedBlack(){
+        return attackedBlack;
+    }
+
+    public ArrayList<Tile> getAttackedWhite(){
+        return attackedWhite;
+    }
+
+    public void addMoves(Tile t){
+        this.moves.add(t);
+    }
+
+    public void addAttackable(Tile t){
+        this.attackable.add(t);
+    }
+
+    public void resetMoves(){
+        this.moves.clear();
+        this.attackable.clear();
+    }
+
+    public ArrayList<Tile> getMoves(){
+        return this.moves;
+    }
+
+    // returns the difference in value of the attackable piece vs current piece
+    public double getValueDelta(Tile t){
+        return t.getHeldPiece().getPieceValue() - this.getHeldPiece().getPieceValue();
     }
 
     public void draw(PApplet app){
@@ -75,32 +126,29 @@ public class Tile{
                 break;
             case 1:
                 if(this.dark){
-                    app.fill(PApplet.unhex(DARK_BLUE));
+                    app.fill(DARK_BLUE);
                 }else{
-                    app.fill(PApplet.unhex(LIGHT_BLUE));
+                    app.fill(LIGHT_BLUE);
                 }
                 break;
             case 2:
                 if(this.dark){
-                    app.fill(PApplet.unhex(DARK_GREEN));
+                    app.fill(DARK_GREEN);
                 }else{
-                    app.fill(PApplet.unhex(LIGHT_GREEN));
+                    app.fill(LIGHT_GREEN);
                 }
                 break;
             case 3:
-                app.fill(PApplet.unhex(SELECTION_GREEN));
+                app.fill(SELECTION_GREEN);
                 break;
             case 4:
-                app.fill(PApplet.unhex(LIGHT_RED));
+                app.fill(LIGHT_RED);
                 break;
             case 5:
-                app.fill(PApplet.unhex(DARK_RED));
+                app.fill(DARK_RED);
                 break;
                 
         }
         app.rect(x,y,cellSize,cellSize);
     }
-
-
-
 }

@@ -62,6 +62,10 @@ public abstract class Piece{
         return this.sprite;
     }
 
+    public int[] getMoveset(){
+        return this.moveset;
+    }
+
     public void tick(){
 
     };

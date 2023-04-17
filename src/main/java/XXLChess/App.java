@@ -28,6 +28,9 @@ public class App extends PApplet {
 
     protected Tile[][] board;
     protected Piece selPiece;
+    protected Tile selTile;
+    protected boolean playerBlack;
+    protected static boolean kingInCheck = false;
     public static final int FPS = 60;
 	
     public String configPath;
@@ -119,6 +122,7 @@ public class App extends PApplet {
     */
     public void setup() {
         frameRate(FPS);
+        noStroke();
 
         // Load images during setup
 
@@ -137,7 +141,7 @@ public class App extends PApplet {
             }
         }
 
-
+        playerBlack = true;
     }
 
     /**
@@ -157,7 +161,17 @@ public class App extends PApplet {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        
+        if(mouseX < 672){
+            int boardX = Math.floorDiv(mouseX, CELLSIZE);
+            int boardY = Math.floorDiv(mouseY, CELLSIZE);
+            if(selTile == null){
+                if(board[boardX][boardY].getHeldPiece() != null){
+                    if(board[boardX][boardY].getHeldPiece().isBlack() == playerBlack){
+                        select(boardX, boardY);
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -181,7 +195,35 @@ public class App extends PApplet {
     }
 	
 	// Add any additional methods or attributes you want. Please put classes in different files.
+    public void select(int x, int y){
+        selTile = board[x][y];
+        selTile.updateStatus(3);
+        ArrayList<Tile> moves = selTile.getMoves();
+        for(Tile t:moves){
+            
+        }
+    }
 
+    public Tile[] checkLegalMove(Tile t){
+        Piece heldPiece = t.getHeldPiece();
+        int x = t.getXPos();
+        int y = t.getYPos();
+        int[] moveset = heldPiece.getMoveset();
+        if(moveset[0] != 0){
+            for(int i = x; i < moveset[0]; i++){
+                if(i >= BOARD_WIDTH){
+                    break;
+                }else{
+                    if(board[i][y].getHeldPiece() == null){
+                        board[i][y].updateStatus(1);
+                    }else if(board[i][y].getHeldPiece().isBlack() == playerBlack){
+                        break;
+                    }else if(board[i][y].getHeldPiece().isBlack() != playerBlack){
+                        board[i][y].updateStatus(4);
+                    }
+                }
+            }
+    }
 
     public static void main(String[] args) {
         PApplet.main("XXLChess.App");
