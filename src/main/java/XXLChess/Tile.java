@@ -21,6 +21,8 @@ public class Tile{
     protected ArrayList<Tile> moves;
     protected ArrayList<Tile> attackable;
     protected String tileName;
+    private static final String[] ROWNAMES = {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"};
+    private static final String[] COLUMNNAMES = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V"};
 
     private static final int DARK_BROWN = 0xFFB58863;
     private static final int LIGHT_BROWN = 0xFFF0D9B5;
@@ -32,8 +34,9 @@ public class Tile{
     private static final int LIGHT_RED = 0xFFFFA466;
     private static final int DARK_RED = 0xFFFF0000;
 
-    public Tile(int cellSize, int x, int y, boolean dark){
+    public Tile(int cellSize, int x, int y, boolean dark, String tileName){
         this.cellSize = cellSize;
+        this.tileName = tileName;
         this.xPos = x;
         this.yPos = y;
         this.x = x * cellSize;
@@ -57,18 +60,22 @@ public class Tile{
     }
 
     public int getX(){
+        // x position in pixels
         return this.x;
     }
 
     public int getY(){
+        // y position in pixels
         return this.y;
     }
 
     public int getXPos(){
+        // x position in cells
         return this.xPos;
     }
 
     public int getYPos(){
+        // y position in cells
         return this.yPos;
     }
 
@@ -82,6 +89,18 @@ public class Tile{
 
     public Piece getHeldPiece() {
         return heldPiece;
+    }
+
+    public static String getRowNames(int i){
+        return ROWNAMES[i];
+    }
+
+    public static String getColumnNames(int i){
+        return COLUMNNAMES[i];
+    }
+
+    public String getTileName(){
+        return tileName;
     }
 
     public void addAttackedBy(Tile t){
@@ -112,6 +131,8 @@ public class Tile{
     public void resetMoves(){
         this.moves.clear();
         this.attackable.clear();
+        this.attackedBlack.clear();
+        this.attackedWhite.clear();
     }
 
     public ArrayList<Tile> getMoves(){
