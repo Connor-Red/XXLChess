@@ -18,6 +18,8 @@ import java.util.*;
 
 public class App extends PApplet {
 
+    public static final boolean DEBUG = true;
+
     public static final int SPRITESIZE = 480;
     public static final int CELLSIZE = 48;
     public static final int SIDEBAR = 120;
@@ -165,6 +167,10 @@ public class App extends PApplet {
         if(mouseX < 672){
             int boardX = Math.floorDiv(mouseX, CELLSIZE);
             int boardY = Math.floorDiv(mouseY, CELLSIZE);
+            if(DEBUG){
+                Tile thisTile = this.board[boardX][boardY];
+                System.out.println(thisTile.getTileName() + " clicked.");
+            }
             if(selTile == null){
                 if(board[boardX][boardY].getHeldPiece() != null){
                     if(board[boardX][boardY].getHeldPiece().isBlack() == playerBlack){
@@ -206,7 +212,6 @@ public class App extends PApplet {
 	// Add any additional methods or attributes you want. Please put classes in different files.
     public void select(int x, int y){
         this.selTile = board[x][y];
-        System.out.println(selTile.tileName);
         this.selTile.updateStatus(3);
         ArrayList<Tile> moves = this.selTile.getMoves();
         ArrayList<Tile> attacks = this.selTile.getAttackable();
@@ -237,6 +242,9 @@ public class App extends PApplet {
         targetPiece.setY(destination.getY());
         destination.updatePiece(targetPiece);
         origin.updatePiece(null);
+        if((targetPiece.getPieceName() == "P") || ((targetPiece.getPieceName() == "P"))){
+            ((Pawn) targetPiece).setHasMoved(true);
+        }
         deselect();
         updateAll();
     }
@@ -331,8 +339,9 @@ public class App extends PApplet {
                         }
                     }
                 }
+            }
             if(moveset[1] != 0){
-                for(int i = 0; i < moveset[0]; i++){
+                for(int i = 0; i < moveset[1]; i++){
                     int j = x + i + 1;
                     int k = y + i + 1;
                     if((j >= BOARD_WIDTH) || (k >= BOARD_WIDTH)){
@@ -351,7 +360,7 @@ public class App extends PApplet {
                         }
                     }
                 }
-                for(int i = 0; i < moveset[0]; i++){
+                for(int i = 0; i < moveset[1]; i++){
                     int j = x - i - 1;
                     int k = y - i - 1;
                     if((j < 0) || (k < 0)){
@@ -370,7 +379,7 @@ public class App extends PApplet {
                         }
                     }
                 }
-                for(int i = 0; i < moveset[0]; i++){
+                for(int i = 0; i < moveset[1]; i++){
                     int j = x + i + 1;
                     int k = y - i - 1;
                     if((j >= BOARD_WIDTH) || (k < 0)){
@@ -389,7 +398,7 @@ public class App extends PApplet {
                         }
                     }
                 }
-                for(int i = 0; i < moveset[0]; i++){
+                for(int i = 0; i < moveset[1]; i++){
                     int j = x - i - 1;
                     int k = y + i + 1;
                     if((k >= BOARD_WIDTH) || (j < 0)){
@@ -408,6 +417,7 @@ public class App extends PApplet {
                         }
                     }
                 }
+            }
             if(moveset[2] != 0){
                 for(int i = 0; i < 2; i++){
                     int j = (x + (i * 2)) - 1;
@@ -470,78 +480,76 @@ public class App extends PApplet {
                     }
                 }
             }
+        }else{
+            boolean black = heldPiece.isBlack();
+            boolean hasMoved = ((Pawn) heldPiece).getHasMoved();
+            if(black){
+                if((x + 1) < BOARD_WIDTH){
+                    if((y + 1) < BOARD_WIDTH){
+                        // black pawn capture right
+                        if(board[x + 1][y + 1].getHeldPiece() != null){
+                            if(board[x + 1][y + 1].getHeldPiece().isBlack() == black){
+                                canProtect.add(board[x + 1][y + 1]);
+                            }else{
+                                canProtect.add(board[x + 1][y + 1]);
+                                canCapture.add(board[x + 1][y + 1]);
+                            }
+                        }
+                    }
+                    if((y - 1) >= 0){
+                        // black pawn capture left
+                        if(board[x + 1][y - 1].getHeldPiece() != null){
+                            if(board[x + 1][y - 1].getHeldPiece().isBlack() == black){
+                                canProtect.add(board[x + 1][y - 1]);
+                            }else{
+                                canProtect.add(board[x + 1][y - 1]);
+                                canCapture.add(board[x + 1][y - 1]);
+                            }
+                        }
+                    }
+                    if(board[x + 1][y].getHeldPiece() == null){
+                        canMove.add(board[x + 1][y]);
+                        if(!(hasMoved)){
+                            if(board[x + 2][y].getHeldPiece() == null){
+                                canMove.add(board[x + 2][y]);
+                            }
+                        }
+                    }
+                }
+            }else{
+                if((x - 1) > 0){
+                    if((y + 1) < BOARD_WIDTH){
+                        // white pawn capture right
+                        if(board[x - 1][y + 1].getHeldPiece() != null){
+                            if(board[x - 1][y + 1].getHeldPiece().isBlack() == black){
+                                canProtect.add(board[x - 1][y + 1]);
+                            }else{
+                                canProtect.add(board[x - 1][y + 1]);
+                                canCapture.add(board[x - 1][y + 1]);
+                            }
+                        }
+                    }
+                    if((y - 1) >= 0){
+                        // white pawn capture left
+                        if(board[x - 1][y - 1].getHeldPiece() != null){
+                            if(board[x - 1][y - 1].getHeldPiece().isBlack() == black){
+                                canProtect.add(board[x - 1][y - 1]);
+                            }else{
+                                canProtect.add(board[x - 1][y - 1]);
+                                canCapture.add(board[x - 1][y - 1]);
+                            }
+                        }
+                    }
+                    if(board[x - 1][y].getHeldPiece() == null){
+                        canMove.add(board[x - 1][y]);
+                        if(!(hasMoved)){
+                            if(board[x - 2][y].getHeldPiece() == null){
+                                canMove.add(board[x - 2][y]);
+                            }
+                        }
+                    }
+                }
             }
-        }
-        // }else{
-        //     boolean black = heldPiece.isBlack();
-        //     boolean hasMoved = ((Pawn) heldPiece).getHasMoved();
-        //     if(black){
-        //         if((y - 1) >= 0){
-        //             if((x + 1) < BOARD_WIDTH){
-        //                 // black pawn capture right
-        //                 if(board[x + 1][y - 1].getHeldPiece() != null){
-        //                     if(board[x + 1][y - 1].getHeldPiece().isBlack() == black){
-        //                         canProtect.add(board[x + 1][y - 1]);
-        //                     }else{
-        //                         canProtect.add(board[x + 1][y - 1]);
-        //                         canCapture.add(board[x + 1][y - 1]);
-        //                     }
-        //                 }
-        //             }
-        //             if((x - 1) >= 0){
-        //                 // black pawn capture left
-        //                 if(board[x - 1][y - 1].getHeldPiece() != null){
-        //                     if(board[x - 1][y - 1].getHeldPiece().isBlack() == black){
-        //                         canProtect.add(board[x - 1][y - 1]);
-        //                     }else{
-        //                         canProtect.add(board[x - 1][y - 1]);
-        //                         canCapture.add(board[x - 1][y - 1]);
-        //                     }
-        //                 }
-        //             }
-        //             if(board[x][y - 1].getHeldPiece() == null){
-        //                 canMove.add(board[x][y - 1]);
-        //                 if(!(hasMoved)){
-        //                     if(board[x][y - 2].getHeldPiece() == null){
-        //                         canMove.add(board[x][y - 2]);
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }else{
-        //         if((y + 1) < BOARD_WIDTH){
-        //             if((x + 1) < BOARD_WIDTH){
-        //                 // white pawn capture right
-        //                 if(board[x + 1][y - 1].getHeldPiece() != null){
-        //                     if(board[x + 1][y - 1].getHeldPiece().isBlack() == black){
-        //                         canProtect.add(board[x + 1][y + 1]);
-        //                     }else{
-        //                         canProtect.add(board[x + 1][y + 1]);
-        //                         canCapture.add(board[x + 1][y + 1]);
-        //                     }
-        //                 }
-        //             }
-        //             if((x - 1) >= 0){
-        //                 // white pawn capture left
-        //                 if(board[x - 1][y - 1].getHeldPiece() != null){
-        //                     if(board[x - 1][y - 1].getHeldPiece().isBlack() == black){
-        //                         canProtect.add(board[x - 1][y + 1]);
-        //                     }else{
-        //                         canProtect.add(board[x - 1][y + 1]);
-        //                         canCapture.add(board[x - 1][y + 1]);
-        //                     }
-        //                 }
-        //             }
-        //             if(board[x][y + 1].getHeldPiece() == null){
-        //                 canMove.add(board[x][y + 1]);
-        //                 if(!(hasMoved)){
-        //                     if(board[x][y + 2].getHeldPiece() == null){
-        //                         canMove.add(board[x][y + 2]);
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
         }
         return moves;
     }  
