@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.awt.Font;
 import java.io.*;
 import java.util.*;
+import java.lang.Math;
 
 public class App extends PApplet {
 
@@ -24,6 +25,8 @@ public class App extends PApplet {
     public static final int CELLSIZE = 48;
     public static final int SIDEBAR = 120;
     public static final int BOARD_WIDTH = 14;
+    public static final int PIECE_MOVEMENT_SPEED = 6;
+    public static final double MAX_MOVEMENT_TIME = 1;
 
     public static int WIDTH = CELLSIZE*BOARD_WIDTH+SIDEBAR;
     public static int HEIGHT = BOARD_WIDTH*CELLSIZE;
@@ -31,6 +34,11 @@ public class App extends PApplet {
     protected Tile[][] board;
     protected Piece selPiece;
     protected Tile selTile;
+    private Tile destTile;
+    private Tile originTile;
+    private Piece movementPiece;
+    private double movementX;
+    private double movementY;
     protected boolean playerBlack;
     protected boolean currentTurn;
     protected static boolean bKingInCheck = false;
@@ -38,6 +46,9 @@ public class App extends PApplet {
     protected static Tile bKingPos;
     protected static Tile wKingPos;
     public static final int FPS = 60;
+    public static int animation = 0;
+    public static boolean inAnimation = false;
+
 	
     public String configPath;
 
@@ -149,8 +160,8 @@ public class App extends PApplet {
             }
         }
 
-        playerBlack = true;
-        currentTurn = true;
+        playerBlack = false;
+        currentTurn = false;
         updateAll();
     }
 
@@ -173,43 +184,45 @@ public class App extends PApplet {
         if(mouseX < 672){
             int boardY = Math.floorDiv(mouseX, CELLSIZE);
             int boardX = Math.floorDiv(mouseY, CELLSIZE);
-            if(DEBUG){
-                Tile thisTile = this.board[boardX][boardY];
-                System.out.println();
-                System.out.println(thisTile.getTileName() + " clicked.");
-                System.out.println("White pieces that can attack here:");
-                for(Tile t: thisTile.getAttackedWhite()){
-                    System.out.print(t.getTileName() + ", ");
-                }
-                System.out.println("Black pieces that can attack here:");
-                for(Tile t: thisTile.getAttackedBlack()){
-                    System.out.print(t.getTileName() + ", ");
-                }
-                if(thisTile.getHeldPiece() != null){
-                    System.out.println("Contained piece: ");
-                    System.out.println(thisTile.getHeldPiece().getPieceName());
-                    System.out.println("Can legally attack:");
-                    for(Tile t: thisTile.getLegalAttacks()){
-                        System.out.println(t.getTileName());
+            if(!inAnimation){
+                if(DEBUG){
+                    Tile thisTile = this.board[boardX][boardY];
+                    System.out.println();
+                    System.out.println(thisTile.getTileName() + " clicked.");
+                    System.out.println("White pieces that can attack here:");
+                    for(Tile t: thisTile.getAttackedWhite()){
+                        System.out.print(t.getTileName() + ", ");
                     }
-                }
-                System.out.println("King pos: " + bKingPos.getTileName());
-
-            }
-            if(selTile == null){
-                if(board[boardX][boardY].getHeldPiece() != null){
-                    if(board[boardX][boardY].getHeldPiece().isBlack() == playerBlack){
-                        select(boardX, boardY);
+                    System.out.println("Black pieces that can attack here:");
+                    for(Tile t: thisTile.getAttackedBlack()){
+                        System.out.print(t.getTileName() + ", ");
                     }
+                    if(thisTile.getHeldPiece() != null){
+                        System.out.println("Contained piece: ");
+                        System.out.println(thisTile.getHeldPiece().getPieceName());
+                        System.out.println("Can legally attack:");
+                        for(Tile t: thisTile.getLegalAttacks()){
+                            System.out.println(t.getTileName());
+                        }
+                    }
+                    System.out.println("King pos: " + bKingPos.getTileName());
+    
                 }
-            }else if(selTile == board[boardX][boardY]){
-                deselect();
-            }else if(selTile.legalMoves.contains(board[boardX][boardY])){
-                move(selTile, board[boardX][boardY]);
-            }else if(selTile.legalAttacks.contains(board[boardX][boardY])){
-                move(selTile, board[boardX][boardY]);
-            }else{
-                deselect();
+                if(selTile == null){
+                    if(board[boardX][boardY].getHeldPiece() != null){
+                        if(board[boardX][boardY].getHeldPiece().isBlack() == playerBlack){
+                            select(boardX, boardY);
+                        }
+                    }
+                }else if(selTile == board[boardX][boardY]){
+                    deselect();
+                }else if(selTile.legalMoves.contains(board[boardX][boardY])){
+                    move(selTile, board[boardX][boardY]);
+                }else if(selTile.legalAttacks.contains(board[boardX][boardY])){
+                    move(selTile, board[boardX][boardY]);
+                }else{
+                    deselect();
+                }
             }
         }
     }
@@ -223,6 +236,15 @@ public class App extends PApplet {
      * Draw all elements in the game by current frame. 
     */
     public void draw() {
+        if(animation > 0){
+            animation --;
+            movementPiece.incX(movementX);
+            movementPiece.incY(movementY);
+        }
+        if((animation == 0) && inAnimation){
+            inAnimation = false;
+            completeMovement();
+        }
         background(200, 200, 200);
         for(int i = 0; i < BOARD_WIDTH; i++){
             for(int j = 0; j < BOARD_WIDTH; j++){
@@ -231,6 +253,9 @@ public class App extends PApplet {
                     this.board[i][j].getHeldPiece().draw(this);
                 }
             }
+        }
+        if(animation > 0){
+            movementPiece.draw(this);
         }
     }
 	
@@ -250,8 +275,8 @@ public class App extends PApplet {
 
     public void deselect(){
         this.selTile.updateStatus(0);
-        ArrayList<Tile> moves = this.selTile.getMoves();
-        ArrayList<Tile> attacks = this.selTile.getAttackable();
+        ArrayList<Tile> moves = this.selTile.getLegalMoves();
+        ArrayList<Tile> attacks = this.selTile.getLegalAttacks();
         for(Tile t:moves){
             t.prevStatus();
         }
@@ -262,19 +287,47 @@ public class App extends PApplet {
     }
 
     public void move(Tile origin, Tile destination){
-        Piece targetPiece = origin.getHeldPiece();
-        targetPiece.setX(destination.getX());
-        targetPiece.setY(destination.getY());
-        destination.updatePiece(targetPiece);
-        origin.updatePiece(null);
-        if((targetPiece.getPieceName() == "P") || ((targetPiece.getPieceName() == "P"))){
-            ((Pawn) targetPiece).setHasMoved(true);
-        }else if((targetPiece.getPieceName().equals("K"))){
-            bKingPos = destination;
-        }else if(((targetPiece.getPieceName().equals("k")))){
-            wKingPos = destination;
+        movementPiece = origin.getHeldPiece();
+        destTile = destination;
+        originTile = origin;
+        int framesReq;
+        double deltaX = destination.getX() - movementPiece.getX();
+        double deltaY = destination.getY() - movementPiece.getY();
+        double distance = Math.sqrt(Math.pow((deltaX), 2) + Math.pow((deltaY), 2));
+        if((distance / (PIECE_MOVEMENT_SPEED * FPS)) < MAX_MOVEMENT_TIME){
+            framesReq = Math.floorDiv((int)distance, PIECE_MOVEMENT_SPEED);
+            movementX = ((PIECE_MOVEMENT_SPEED/distance) * deltaX);
+            movementY = ((PIECE_MOVEMENT_SPEED/distance) * deltaY);
+        }else{
+            double velocity = distance / FPS * MAX_MOVEMENT_TIME;
+            framesReq = (int)MAX_MOVEMENT_TIME * FPS;
+            movementX = ((velocity/distance) * deltaX);
+            movementY = ((velocity/distance) * deltaY);
         }
+        animation = framesReq;
+        inAnimation = true;
         deselect();
+        originTile.updateStatus(2);
+        destTile.updateStatus(2);
+    }
+
+    public void completeMovement(){
+        movementPiece.setX(destTile.getX());
+        movementPiece.setY(destTile.getY());
+        if((movementPiece.getPieceName() == "P") || ((movementPiece.getPieceName() == "p"))){
+            ((Pawn) movementPiece).setHasMoved(true);
+        }else if((movementPiece.getPieceName().equals("K"))){
+            bKingPos = destTile;
+        }else if(((movementPiece.getPieceName().equals("k")))){
+            wKingPos = destTile;
+        }
+        destTile.updatePiece(movementPiece);
+        originTile.updatePiece(null);
+        originTile.updateStatus(0);
+        destTile.updateStatus(0);
+        movementPiece = null;
+        movementX = 0;
+        movementY = 0;
         updateAll();
     }
 
@@ -589,7 +642,7 @@ public class App extends PApplet {
             }
         }
         return moves;
-    }  
+    }
 
     public void commitMoves(HashMap<Integer, ArrayList<Tile>> moves, Tile commitTile){
         ArrayList<Tile> canMove = moves.get(0);
@@ -606,7 +659,7 @@ public class App extends PApplet {
         }
     }
 
-    
+
     public boolean checkLegal(Tile origin, Tile dest){
         /* 
          * Checks whether a move is legal by making the move, seeing if the current turn
@@ -623,7 +676,6 @@ public class App extends PApplet {
         Piece originPiece = origin.getHeldPiece();
         if(originPiece.getPieceName().equals("K")){
             bKingPos = dest;
-            System.out.println("bking moved to " + dest.getTileName());
         }else if(originPiece.getPieceName().equals("k")){
             wKingPos = dest;
         }
@@ -692,6 +744,14 @@ public class App extends PApplet {
                 }
             }
         }
+    }
+
+    public void switchTurn(){
+
+    }
+
+    public void simpleAi(){
+        
     }
 
     public static void main(String[] args) {

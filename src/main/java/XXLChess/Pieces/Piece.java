@@ -4,8 +4,8 @@ import processing.core.PImage;
 import processing.core.PApplet;
 
 public abstract class Piece{
-    protected int x;
-    protected int y;
+    protected double x;
+    protected double y;
     protected double pieceValue;
     protected boolean black; // white = false, black = true
     private PImage sprite;
@@ -25,11 +25,11 @@ public abstract class Piece{
     protected int[] moveset;
     protected String pieceName;
 
-    public int getX() {
+    public double getX() {
         return x;
     }
 
-    public int getY() {
+    public double getY() {
         return y;
     }
 
@@ -74,6 +74,14 @@ public abstract class Piece{
         this.y = y;
     }
 
+    public void incX(double i){
+        this.x += i;
+    }
+    
+    public void incY(double i){
+        this.y += i;
+    }
+
     public void tick(){
 
     };
@@ -81,7 +89,7 @@ public abstract class Piece{
     public void draw(PApplet app) {
         // The image() method is used to draw PImages onto the screen.
         // The first argument is the image, the second and third arguments are coordinates
-        app.image(this.sprite, this.x, this.y);
+        app.image(this.sprite, (float)this.x, (float)this.y);
     }
 
     public String getPieceName() {
