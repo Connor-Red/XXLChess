@@ -293,6 +293,7 @@ public class App extends PApplet {
         moves.put(0,canMove);
         moves.put(1,canProtect);
         moves.put(2,canCapture);
+        boolean black = heldPiece.isBlack();
         if(!(heldPiece.getPieceName() == "P" || heldPiece.getPieceName() == "p")){
             if(moveset[0] != 0){
                 // moveset for rook-like (straight line) movement
@@ -304,10 +305,10 @@ public class App extends PApplet {
                         if(board[j][y].heldPiece == null){
                             canMove.add(board[j][y]);
                             canProtect.add(board[j][y]);
-                        }else if(board[j][y].heldPiece.isBlack() == playerBlack){
+                        }else if(board[j][y].heldPiece.isBlack() == black){
                             canProtect.add(board[j][y]);
                             break;
-                        }else if(board[j][y].heldPiece.isBlack() != playerBlack){
+                        }else if(board[j][y].heldPiece.isBlack() != black){
                             canProtect.add(board[j][y]);
                             canCapture.add(board[j][y]);
                             break;
@@ -322,10 +323,10 @@ public class App extends PApplet {
                         if(board[j][y].heldPiece == null){
                             canMove.add(board[j][y]);
                             canProtect.add(board[j][y]);
-                        }else if(board[j][y].heldPiece.isBlack() == playerBlack){
+                        }else if(board[j][y].heldPiece.isBlack() == black){
                             canProtect.add(board[j][y]);
                             break;
-                        }else if(board[j][y].heldPiece.isBlack() != playerBlack){
+                        }else if(board[j][y].heldPiece.isBlack() != black){
                             canProtect.add(board[j][y]);
                             canCapture.add(board[j][y]);
                             break;
@@ -340,10 +341,10 @@ public class App extends PApplet {
                         if(board[x][j].heldPiece == null){
                             canMove.add(board[x][j]);
                             canProtect.add(board[x][j]);
-                        }else if(board[x][j].heldPiece.isBlack() == playerBlack){
+                        }else if(board[x][j].heldPiece.isBlack() == black){
                             canProtect.add(board[x][j]);
                             break;
-                        }else if(board[x][j].heldPiece.isBlack() != playerBlack){
+                        }else if(board[x][j].heldPiece.isBlack() != black){
                             canProtect.add(board[x][j]);
                             canCapture.add(board[x][j]);
                             break;
@@ -358,10 +359,10 @@ public class App extends PApplet {
                         if(board[x][j].heldPiece == null){
                             canMove.add(board[x][j]);
                             canProtect.add(board[x][j]);
-                        }else if(board[x][j].heldPiece.isBlack() == playerBlack){
+                        }else if(board[x][j].heldPiece.isBlack() == black){
                             canProtect.add(board[x][j]);
                             break;
-                        }else if(board[x][j].heldPiece.isBlack() != playerBlack){
+                        }else if(board[x][j].heldPiece.isBlack() != black){
                             canProtect.add(board[x][j]);
                             canCapture.add(board[x][j]);
                             break;
@@ -379,10 +380,10 @@ public class App extends PApplet {
                         if(board[j][k].heldPiece == null){
                             canMove.add(board[j][k]);
                             canProtect.add(board[j][k]);
-                        }else if(board[j][k].heldPiece.isBlack() == playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() == black){
                             canProtect.add(board[j][k]);
                             break;
-                        }else if(board[j][k].heldPiece.isBlack() != playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() != black){
                             canProtect.add(board[j][k]);
                             canCapture.add(board[j][k]);
                             break;
@@ -398,10 +399,10 @@ public class App extends PApplet {
                         if(board[j][k].heldPiece == null){
                             canMove.add(board[j][k]);
                             canProtect.add(board[j][k]);
-                        }else if(board[j][k].heldPiece.isBlack() == playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() == black){
                             canProtect.add(board[j][k]);
                             break;
-                        }else if(board[j][k].heldPiece.isBlack() != playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() != black){
                             canProtect.add(board[j][k]);
                             canCapture.add(board[j][k]);
                             break;
@@ -417,10 +418,10 @@ public class App extends PApplet {
                         if(board[j][k].heldPiece == null){
                             canMove.add(board[j][k]);
                             canProtect.add(board[j][k]);
-                        }else if(board[j][k].heldPiece.isBlack() == playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() == black){
                             canProtect.add(board[j][k]);
                             break;
-                        }else if(board[j][k].heldPiece.isBlack() != playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() != black){
                             canProtect.add(board[j][k]);
                             canCapture.add(board[j][k]);
                             break;
@@ -436,10 +437,10 @@ public class App extends PApplet {
                         if(board[j][k].heldPiece == null){
                             canMove.add(board[j][k]);
                             canProtect.add(board[j][k]);
-                        }else if(board[j][k].heldPiece.isBlack() == playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() == black){
                             canProtect.add(board[j][k]);
                             break;
-                        }else if(board[j][k].heldPiece.isBlack() != playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() != black){
                             canProtect.add(board[j][k]);
                             canCapture.add(board[j][k]);
                             break;
@@ -455,9 +456,9 @@ public class App extends PApplet {
                         if((board[j][k]).heldPiece == null){
                             canMove.add(board[j][k]);
                             canProtect.add(board[j][k]);
-                        }else if(board[j][k].heldPiece.isBlack() == playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() == black){
                             canProtect.add(board[j][k]);
-                        }else if(board[j][k].heldPiece.isBlack() != playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() != black){
                             canProtect.add(board[j][k]);
                             canCapture.add(board[j][k]);
                         }
@@ -470,9 +471,9 @@ public class App extends PApplet {
                         if((board[j][k]).heldPiece == null){
                             canMove.add(board[j][k]);
                             canProtect.add(board[j][k]);
-                        }else if(board[j][k].heldPiece.isBlack() == playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() == black){
                             canProtect.add(board[j][k]);
-                        }else if(board[j][k].heldPiece.isBlack() != playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() != black){
                             canProtect.add(board[j][k]);
                             canCapture.add(board[j][k]);
                         }
@@ -485,9 +486,9 @@ public class App extends PApplet {
                         if((board[j][k]).heldPiece == null){
                             canMove.add(board[j][k]);
                             canProtect.add(board[j][k]);
-                        }else if(board[j][k].heldPiece.isBlack() == playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() == black){
                             canProtect.add(board[j][k]);
-                        }else if(board[j][k].heldPiece.isBlack() != playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() != black){
                             canProtect.add(board[j][k]);
                             canCapture.add(board[j][k]);
                         }
@@ -500,9 +501,9 @@ public class App extends PApplet {
                         if((board[j][k]).heldPiece == null){
                             canMove.add(board[j][k]);
                             canProtect.add(board[j][k]);
-                        }else if(board[j][k].heldPiece.isBlack() == playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() == black){
                             canProtect.add(board[j][k]);
-                        }else if(board[j][k].heldPiece.isBlack() != playerBlack){
+                        }else if(board[j][k].heldPiece.isBlack() != black){
                             canProtect.add(board[j][k]);
                             canCapture.add(board[j][k]);
                         }
@@ -510,7 +511,6 @@ public class App extends PApplet {
                 }
             }
         }else{
-            boolean black = heldPiece.isBlack();
             boolean hasMoved = ((Pawn) heldPiece).getHasMoved();
             if(black){
                 if((x + 1) < BOARD_WIDTH){
@@ -523,6 +523,8 @@ public class App extends PApplet {
                                 canProtect.add(board[x + 1][y + 1]);
                                 canCapture.add(board[x + 1][y + 1]);
                             }
+                        }else{
+                            canProtect.add(board[x + 1][y + 1]);
                         }
                     }
                     if((y - 1) >= 0){
@@ -534,6 +536,8 @@ public class App extends PApplet {
                                 canProtect.add(board[x + 1][y - 1]);
                                 canCapture.add(board[x + 1][y - 1]);
                             }
+                        }else{
+                            canProtect.add(board[x + 1][y - 1]);
                         }
                     }
                     if(board[x + 1][y].getHeldPiece() == null){
@@ -556,6 +560,8 @@ public class App extends PApplet {
                                 canProtect.add(board[x - 1][y + 1]);
                                 canCapture.add(board[x - 1][y + 1]);
                             }
+                        }else{
+                            canProtect.add(board[x - 1][y + 1]);
                         }
                     }
                     if((y - 1) >= 0){
@@ -567,6 +573,8 @@ public class App extends PApplet {
                                 canProtect.add(board[x - 1][y - 1]);
                                 canCapture.add(board[x - 1][y - 1]);
                             }
+                        }else{
+                            canProtect.add(board[x - 1][y - 1]);
                         }
                     }
                     if(board[x - 1][y].getHeldPiece() == null){
@@ -615,6 +623,7 @@ public class App extends PApplet {
         Piece originPiece = origin.getHeldPiece();
         if(originPiece.getPieceName().equals("K")){
             bKingPos = dest;
+            System.out.println("bking moved to " + dest.getTileName());
         }else if(originPiece.getPieceName().equals("k")){
             wKingPos = dest;
         }
@@ -627,6 +636,7 @@ public class App extends PApplet {
                     for(Tile t:moves){
                         if(currentTurn && (bKingPos == t) && (!this.board[i][j].getHeldPiece().isBlack())){
                             isLegal = false;
+                            System.out.println("King at " + t.getTileName() + " illegal");
                             break;
                         }else if(!currentTurn && (wKingPos == t) && (this.board[i][j].getHeldPiece().isBlack())){
                             isLegal = false;
