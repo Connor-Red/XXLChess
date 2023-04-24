@@ -32,8 +32,11 @@ public class App extends PApplet {
     protected Piece selPiece;
     protected Tile selTile;
     protected boolean playerBlack;
+    protected boolean currentTurn;
     protected static boolean bKingInCheck = false;
     protected static boolean wKingInCheck = false;
+    protected static Tile bKingPos;
+    protected static Tile wKingPos;
     public static final int FPS = 60;
 	
     public String configPath;
@@ -103,7 +106,9 @@ public class App extends PApplet {
 
         // Placing Kings
         board[0][7].updatePiece(new King(board[0][7].getX(), board[0][7].getY(), true));
+        bKingPos = board[0][7];
         board[13][7].updatePiece(new King(board[13][7].getX(), board[13][7].getY(), false));
+        wKingPos = board[13][7];
 
         // Placing Pawns
         for(int i = 0; i < BOARD_WIDTH; i++){
@@ -145,6 +150,7 @@ public class App extends PApplet {
         }
 
         playerBlack = true;
+        currentTurn = true;
         updateAll();
     }
 
@@ -165,11 +171,30 @@ public class App extends PApplet {
     @Override
     public void mouseClicked(MouseEvent e) {
         if(mouseX < 672){
-            int boardX = Math.floorDiv(mouseX, CELLSIZE);
-            int boardY = Math.floorDiv(mouseY, CELLSIZE);
+            int boardY = Math.floorDiv(mouseX, CELLSIZE);
+            int boardX = Math.floorDiv(mouseY, CELLSIZE);
             if(DEBUG){
                 Tile thisTile = this.board[boardX][boardY];
+                System.out.println();
                 System.out.println(thisTile.getTileName() + " clicked.");
+                System.out.println("White pieces that can attack here:");
+                for(Tile t: thisTile.getAttackedWhite()){
+                    System.out.print(t.getTileName() + ", ");
+                }
+                System.out.println("Black pieces that can attack here:");
+                for(Tile t: thisTile.getAttackedBlack()){
+                    System.out.print(t.getTileName() + ", ");
+                }
+                if(thisTile.getHeldPiece() != null){
+                    System.out.println("Contained piece: ");
+                    System.out.println(thisTile.getHeldPiece().getPieceName());
+                    System.out.println("Can legally attack:");
+                    for(Tile t: thisTile.getLegalAttacks()){
+                        System.out.println(t.getTileName());
+                    }
+                }
+                System.out.println("King pos: " + bKingPos.getTileName());
+
             }
             if(selTile == null){
                 if(board[boardX][boardY].getHeldPiece() != null){
@@ -179,9 +204,9 @@ public class App extends PApplet {
                 }
             }else if(selTile == board[boardX][boardY]){
                 deselect();
-            }else if(selTile.moves.contains(board[boardX][boardY])){
+            }else if(selTile.legalMoves.contains(board[boardX][boardY])){
                 move(selTile, board[boardX][boardY]);
-            }else if(selTile.attackable.contains(board[boardX][boardY])){
+            }else if(selTile.legalAttacks.contains(board[boardX][boardY])){
                 move(selTile, board[boardX][boardY]);
             }else{
                 deselect();
@@ -213,8 +238,8 @@ public class App extends PApplet {
     public void select(int x, int y){
         this.selTile = board[x][y];
         this.selTile.updateStatus(3);
-        ArrayList<Tile> moves = this.selTile.getMoves();
-        ArrayList<Tile> attacks = this.selTile.getAttackable();
+        ArrayList<Tile> moves = this.selTile.getLegalMoves();
+        ArrayList<Tile> attacks = this.selTile.getLegalAttacks();
         for(Tile t:moves){
             t.updateStatus(1);
         }
@@ -244,6 +269,10 @@ public class App extends PApplet {
         origin.updatePiece(null);
         if((targetPiece.getPieceName() == "P") || ((targetPiece.getPieceName() == "P"))){
             ((Pawn) targetPiece).setHasMoved(true);
+        }else if((targetPiece.getPieceName().equals("K"))){
+            bKingPos = destination;
+        }else if(((targetPiece.getPieceName().equals("k")))){
+            wKingPos = destination;
         }
         deselect();
         updateAll();
@@ -569,16 +598,87 @@ public class App extends PApplet {
         }
     }
 
+    
+    public boolean checkLegal(Tile origin, Tile dest){
+        /* 
+         * Checks whether a move is legal by making the move, seeing if the current turn
+         * colour's king is in check, and moves the piece back to the original position
+         */
+        Piece destPiece;
+        boolean hasHeldPiece = dest.getHeldPiece() != null;
+        boolean isLegal = true;
+        if(dest.getHeldPiece() != null){
+            destPiece = dest.getHeldPiece();
+        }else{
+            destPiece = null;
+        }
+        Piece originPiece = origin.getHeldPiece();
+        if(originPiece.getPieceName().equals("K")){
+            bKingPos = dest;
+        }else if(originPiece.getPieceName().equals("k")){
+            wKingPos = dest;
+        }
+        dest.updatePiece(originPiece);
+        origin.updatePiece(null);
+        for(int i = 0; (i < BOARD_WIDTH) && isLegal; i++){
+            for(int j = 0; (j < BOARD_WIDTH) && isLegal; j++){
+                if(this.board[i][j].getHeldPiece() != null){
+                    ArrayList<Tile> moves = checkMoves(this.board[i][j]).get(2);
+                    for(Tile t:moves){
+                        if(currentTurn && (bKingPos == t) && (!this.board[i][j].getHeldPiece().isBlack())){
+                            isLegal = false;
+                            break;
+                        }else if(!currentTurn && (wKingPos == t) && (this.board[i][j].getHeldPiece().isBlack())){
+                            isLegal = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        origin.updatePiece(originPiece);
+        if(hasHeldPiece){
+            dest.updatePiece(destPiece);
+        }else{
+            dest.updatePiece(null);
+        }
+        if(originPiece.getPieceName().equals("K")){
+            bKingPos = origin;
+        }else if(originPiece.getPieceName().equals("k")){
+            wKingPos = origin;
+        }
+        return isLegal;
+    }
+
+
     public void updateAll(){
         for(int i = 0; i < BOARD_WIDTH; i++){
             for(int j = 0; j < BOARD_WIDTH; j++){
                 this.board[i][j].resetMoves();
             }
         }
+        // generates psuedo legal moves for all pieces
         for(int i = 0; i < BOARD_WIDTH; i++){
             for(int j = 0; j < BOARD_WIDTH; j++){
                 if(this.board[i][j].getHeldPiece() != null){
                     commitMoves(checkMoves(this.board[i][j]), this.board[i][j]);
+                }
+            }
+        }
+        // checks if pseudo legal moves are legal for all pieces
+        for(int i = 0; i < BOARD_WIDTH; i++){
+            for(int j = 0; j < BOARD_WIDTH; j++){
+                ArrayList<Tile> moves = this.board[i][j].getMoves();
+                ArrayList<Tile> attacks = this.board[i][j].getAttackable();
+                for(Tile t: moves){
+                    if(checkLegal(this.board[i][j], t)){
+                        this.board[i][j].addLegalMoves(t);
+                    }
+                }
+                for(Tile t: attacks){
+                    if(checkLegal(this.board[i][j], t)){
+                        this.board[i][j].addLegalAttacks(t);
+                    }
                 }
             }
         }

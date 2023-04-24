@@ -20,6 +20,9 @@ public class Tile{
     protected ArrayList<Tile> attackedWhite;
     protected ArrayList<Tile> moves;
     protected ArrayList<Tile> attackable;
+
+    protected ArrayList<Tile> legalMoves;
+    protected ArrayList<Tile> legalAttacks;
     protected String tileName;
     private static final String[] ROWNAMES = {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"};
     private static final String[] COLUMNNAMES = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V"};
@@ -39,8 +42,8 @@ public class Tile{
         this.tileName = tileName;
         this.xPos = x;
         this.yPos = y;
-        this.x = x * cellSize;
-        this.y = y * cellSize;
+        this.x = y * cellSize;
+        this.y = x * cellSize;
         this.dark = dark;
         this.status = 0;
         this.prevStatus = 0;
@@ -48,6 +51,8 @@ public class Tile{
         this.attackedWhite = new ArrayList<Tile>();
         this.moves = new ArrayList<Tile>();
         this.attackable = new ArrayList<Tile>();
+        this.legalAttacks = new ArrayList<Tile>();
+        this.legalMoves = new ArrayList<Tile>();
     }
 
     public void updatePiece(Piece pc){
@@ -133,6 +138,8 @@ public class Tile{
         this.attackable.clear();
         this.attackedBlack.clear();
         this.attackedWhite.clear();
+        this.legalAttacks.clear();
+        this.legalMoves.clear();
     }
 
     public ArrayList<Tile> getMoves(){
@@ -141,6 +148,22 @@ public class Tile{
 
     public ArrayList<Tile> getAttackable(){
         return this.attackable;
+    }
+
+    public ArrayList<Tile> getLegalMoves() {
+        return this.legalMoves;
+    }
+
+    public void addLegalMoves(Tile t) {
+        this.legalMoves.add(t);
+    }
+
+    public ArrayList<Tile> getLegalAttacks() {
+        return this.legalAttacks;
+    }
+
+    public void addLegalAttacks(Tile t) {
+        this.legalAttacks.add(t);
     }
 
     // returns the difference in value of the attackable piece vs current piece
