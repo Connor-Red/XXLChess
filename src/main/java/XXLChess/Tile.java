@@ -162,6 +162,10 @@ public class Tile{
         return this.legalAttacks;
     }
 
+    public int getAllMoves(){
+        return this.legalAttacks.size() + this.legalMoves.size();
+    }
+
     public void addLegalAttacks(Tile t) {
         this.legalAttacks.add(t);
     }

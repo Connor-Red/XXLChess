@@ -40,14 +40,25 @@ public class App extends PApplet {
     private double movementX;
     private double movementY;
     protected boolean playerBlack;
-    protected boolean currentTurn;
+    protected boolean currentTurn = false;
     protected static boolean bKingInCheck = false;
     protected static boolean wKingInCheck = false;
+    private static boolean gameEnded = false;
     protected static Tile bKingPos;
     protected static Tile wKingPos;
     public static final int FPS = 60;
     public static int animation = 0;
     public static boolean inAnimation = false;
+    public static final int P_SECONDS = 180;
+    private static int pRemainingTime;
+    public static final int P_INCREMENT = 2;
+    public static final int C_SECONDS = 180;
+    public static final int C_INCREMENT = 2;
+    private static int cRemainingTime;
+    private static String message = "";
+    public static int pTick = 0;
+    public static int cTick = 0;
+
 
 	
     public String configPath;
@@ -162,6 +173,13 @@ public class App extends PApplet {
 
         playerBlack = false;
         currentTurn = false;
+        pRemainingTime = P_SECONDS;
+        cRemainingTime = C_SECONDS;
+        if(playerBlack){
+            message = "AI's turn...";
+        }else{
+            message = "Player's turn...";
+        }
         updateAll();
     }
 
@@ -184,7 +202,7 @@ public class App extends PApplet {
         if(mouseX < 672){
             int boardY = Math.floorDiv(mouseX, CELLSIZE);
             int boardX = Math.floorDiv(mouseY, CELLSIZE);
-            if(!inAnimation){
+            if(!inAnimation && !gameEnded){
                 if(DEBUG){
                     Tile thisTile = this.board[boardX][boardY];
                     System.out.println();
@@ -205,7 +223,7 @@ public class App extends PApplet {
                             System.out.println(t.getTileName());
                         }
                     }
-                    System.out.println("King pos: " + bKingPos.getTileName());
+                    System.out.println("BKing pos: " + bKingPos.getTileName());
     
                 }
                 if(selTile == null){
@@ -246,6 +264,35 @@ public class App extends PApplet {
             completeMovement();
         }
         background(200, 200, 200);
+        fill(0,0,0);
+        textSize(35);
+        if(playerBlack){
+            text(toTimeString(pRemainingTime),690,50);
+            text(toTimeString(cRemainingTime),690,622);
+        }else{
+            text(toTimeString(cRemainingTime),690,50);
+            text(toTimeString(pRemainingTime),690,622);
+        }
+        textSize(15);
+        text(message, 690,250,100,300);
+        if(!gameEnded){
+            if((playerBlack == currentTurn)){
+                pTick ++;
+                if(pTick >= 60){
+                    pTick = 0;
+                    pRemainingTime --;
+                }
+            }else{
+                cTick ++;
+                if(cTick >= 60){
+                    cTick = 0;
+                    cRemainingTime --;
+                }
+            }
+        }
+        if(pRemainingTime <= 0 || cRemainingTime <= 0){
+            win(1);
+        }
         for(int i = 0; i < BOARD_WIDTH; i++){
             for(int j = 0; j < BOARD_WIDTH; j++){
                 this.board[i][j].draw(this);
@@ -306,7 +353,9 @@ public class App extends PApplet {
         }
         animation = framesReq;
         inAnimation = true;
-        deselect();
+        if(selTile != null){
+            deselect();
+        }
         originTile.updateStatus(2);
         destTile.updateStatus(2);
     }
@@ -328,7 +377,13 @@ public class App extends PApplet {
         movementPiece = null;
         movementX = 0;
         movementY = 0;
+        if(playerBlack == currentTurn){
+            pRemainingTime += 2;
+        }else{
+            cRemainingTime += 2;
+        }
         updateAll();
+        switchTurn();
     }
 
     public HashMap<Integer, ArrayList<Tile>> checkMoves(Tile t){
@@ -686,11 +741,10 @@ public class App extends PApplet {
                 if(this.board[i][j].getHeldPiece() != null){
                     ArrayList<Tile> moves = checkMoves(this.board[i][j]).get(2);
                     for(Tile t:moves){
-                        if(currentTurn && (bKingPos == t) && (!this.board[i][j].getHeldPiece().isBlack())){
+                        if(!currentTurn && (bKingPos == t) && (!this.board[i][j].getHeldPiece().isBlack())){
                             isLegal = false;
-                            System.out.println("King at " + t.getTileName() + " illegal");
                             break;
-                        }else if(!currentTurn && (wKingPos == t) && (this.board[i][j].getHeldPiece().isBlack())){
+                        }else if(currentTurn && (wKingPos == t) && (this.board[i][j].getHeldPiece().isBlack())){
                             isLegal = false;
                             break;
                         }
@@ -747,11 +801,79 @@ public class App extends PApplet {
     }
 
     public void switchTurn(){
+        currentTurn = !currentTurn;
+        if(!(playerBlack == currentTurn)){
+            message = "AI's turn...";
+            simpleAi();
+        }else{
+            message = "Player's turn...";
+        }
+    }
 
+    public String toTimeString(int s){
+        String timeString;
+        int mins = 0;
+        if(s > 59){
+            mins = Math.floorDiv(s, 60);
+            s -= 60 * mins;
+        }
+        if(s < 10){
+            timeString = Integer.toString(mins) + ":0" + Integer.toString(s);
+        }else{
+            timeString = Integer.toString(mins) + ":" + Integer.toString(s);
+        }
+        return timeString;
+    }
+
+    public void win(int status){
+        gameEnded = true;
+        switch(status){
+            case 0:
+                if(playerBlack == currentTurn){
+                    message = "You lost by checkmate!";
+                }else{
+                    message = "You won by checkmate!";
+                }
+            case 1:
+                if(pRemainingTime <= 0){
+                    message = "You lost by time!";
+                }
+                if(cRemainingTime <= 0){
+                    message = "You won by time!";
+                }
+            case 2:
+                message = "Stalemate!";
+        }
     }
 
     public void simpleAi(){
-        
+        ArrayList<Tile[]> possibleMoves = new ArrayList<Tile[]>();
+        for(int i = 0; i < BOARD_WIDTH; i++){
+            for(int j = 0; j < BOARD_WIDTH; j++){
+                if(this.board[i][j].getHeldPiece() != null){
+                    if(this.board[i][j].getHeldPiece().isBlack() != playerBlack){
+                        ArrayList<Tile> moves = this.board[i][j].getLegalMoves();
+                        ArrayList<Tile> attacks = this.board[i][j].getLegalAttacks();
+                        for(Tile t:moves){
+                            Tile[] m = {this.board[i][j], t};
+                            possibleMoves.add(m);
+                        }
+                        for(Tile t:attacks){
+                            Tile[] m = {this.board[i][j], t};
+                            possibleMoves.add(m);
+                        }
+                    }
+                }
+            }
+        }
+        Random rand = new Random();
+        System.out.println(possibleMoves.size());
+        if(possibleMoves.size() == 0){
+            win(0);
+        }else{
+            int n = rand.nextInt(possibleMoves.size());
+            move(possibleMoves.get(n)[0], possibleMoves.get(n)[1]);
+        }
     }
 
     public static void main(String[] args) {
