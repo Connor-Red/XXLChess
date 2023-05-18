@@ -206,8 +206,6 @@ public class App extends PApplet {
                 String rowPieces = layoutRows[i];
                 for(int h = 0; h < 14; h++){
                     char placePiece = rowPieces.charAt(h);
-                    System.out.println(placePiece);
-                    System.out.println("bruh");
                     switch(placePiece){
                         case 'R': board[i][h].updatePiece(new Rook(board[i][h].getX(), board[i][h].getY(), true)); break;
                         case 'r': board[i][h].updatePiece(new Rook(board[i][h].getX(), board[i][h].getY(), false)); break;
@@ -296,7 +294,7 @@ public class App extends PApplet {
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mousePressed(MouseEvent e) {
         if(mouseX < 672){
             int boardY = Math.floorDiv(mouseX, CELLSIZE);
             int boardX = Math.floorDiv(mouseY, CELLSIZE);
@@ -468,10 +466,20 @@ public class App extends PApplet {
         }else if(((movementPiece.getPieceName().equals("k")))){
             wKingPos = destTile;
         }
-        destTile.updatePiece(movementPiece);
         originTile.updatePiece(null);
         originTile.updateStatus(0);
         destTile.updateStatus(0);
+        if(movementPiece.getPieceName() == "P" && destTile.getXPos() == 7){
+            destTile.updatePiece(new Queen(destTile.getX(), destTile.getY(), true));
+            destTile.getHeldPiece().setSprite(this.loadImage(destTile.getHeldPiece().getSpriteString()));
+            destTile.getHeldPiece().getSprite().resize(48, 0);
+        }else if(movementPiece.getPieceName() == "p" && destTile.getXPos() == 6){
+            destTile.updatePiece(new Queen(destTile.getX(), destTile.getY(), false));
+            destTile.getHeldPiece().setSprite(this.loadImage(destTile.getHeldPiece().getSpriteString()));
+            destTile.getHeldPiece().getSprite().resize(48, 0);
+        }else{
+            destTile.updatePiece(movementPiece);
+        }
         movementPiece = null;
         movementX = 0;
         movementY = 0;
@@ -932,6 +940,7 @@ public class App extends PApplet {
                 }else{
                     message = "You won by checkmate!";
                 }
+                break;
             case 1:
                 if(pRemainingTime <= 0){
                     message = "You lost by time!";
@@ -939,8 +948,10 @@ public class App extends PApplet {
                 if(cRemainingTime <= 0){
                     message = "You won by time!";
                 }
+                break;
             case 2:
                 message = "Stalemate!";
+                break;
         }
     }
 
