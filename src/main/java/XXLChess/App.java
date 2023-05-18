@@ -252,12 +252,16 @@ public class App extends PApplet {
 
         }catch(FileNotFoundException e){
             System.out.println("Layout file not found");
+            win(4);
         }catch(ArithmeticException e){
             System.out.println("Invalid length of the layout file");
+            win(4);
         }catch(NullPointerException e){
             System.out.println("Invalid length of the layout file");
+            win(4);
         }catch(IllegalArgumentException e){
             System.out.println("Error: Invalid number of Kings");
+            win(4);
         }
         for(int j = 0; j < BOARD_WIDTH; j++){
             for(int i = 0; i < BOARD_WIDTH; i++){
@@ -666,7 +670,7 @@ public class App extends PApplet {
                 for(int i = 0; i < 2; i++){
                     int j = (x + (i * 2)) - 1;
                     int k = moveset[2] + y;
-                    if(((j > 0) && (j < BOARD_WIDTH)) && ((k > 0) && (k < BOARD_WIDTH))){
+                    if((!(j < 0) && (j < BOARD_WIDTH)) && (!(k < 0) && (k < BOARD_WIDTH))){
                         if((board[j][k]).heldPiece == null){
                             canMove.add(board[j][k]);
                             canProtect.add(board[j][k]);
@@ -681,7 +685,7 @@ public class App extends PApplet {
                 for(int i = 0; i < 2; i++){
                     int j = (x + (i * 2)) - 1;
                     int k = y - moveset[2];
-                    if(((j > 0) && (j < BOARD_WIDTH)) && ((k > 0) && (k < BOARD_WIDTH))){
+                    if((!(j < 0) && (j < BOARD_WIDTH)) && (!(k < 0) && (k < BOARD_WIDTH))){
                         if((board[j][k]).heldPiece == null){
                             canMove.add(board[j][k]);
                             canProtect.add(board[j][k]);
@@ -696,7 +700,7 @@ public class App extends PApplet {
                 for(int i = 0; i < 2; i++){
                     int j = moveset[2] + x;
                     int k = (y + (i * 2)) - 1;
-                    if(((j > 0) && (j < BOARD_WIDTH)) && ((k > 0) && (k < BOARD_WIDTH))){
+                    if((!(j < 0) && (j < BOARD_WIDTH)) && (!(k < 0) && (k < BOARD_WIDTH))){
                         if((board[j][k]).heldPiece == null){
                             canMove.add(board[j][k]);
                             canProtect.add(board[j][k]);
@@ -711,7 +715,7 @@ public class App extends PApplet {
                 for(int i = 0; i < 2; i++){
                     int j = x - moveset[2];
                     int k = (y + (i * 2)) - 1;
-                    if(((j > 0) && (j < BOARD_WIDTH)) && ((k > 0) && (k < BOARD_WIDTH))){
+                    if((!(j < 0) && (j < BOARD_WIDTH)) && (!(k < 0) && (k < BOARD_WIDTH))){
                         if((board[j][k]).heldPiece == null){
                             canMove.add(board[j][k]);
                             canProtect.add(board[j][k]);
@@ -951,6 +955,9 @@ public class App extends PApplet {
                 break;
             case 2:
                 message = "Stalemate!";
+                break;
+            case 4:
+                message = "Error reading config file";
                 break;
         }
     }
