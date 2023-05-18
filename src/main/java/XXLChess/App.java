@@ -9,6 +9,7 @@ import processing.data.JSONArray;
 import processing.core.PFont;
 import processing.event.MouseEvent;
 import XXLChess.Pieces.*;
+import jogamp.opengl.util.av.JavaSoundAudioSink;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -25,11 +26,11 @@ public class App extends PApplet {
     public static final int CELLSIZE = 48;
     public static final int SIDEBAR = 120;
     public static final int BOARD_WIDTH = 14;
-    public static final int PIECE_MOVEMENT_SPEED = 6;
-    public static final double MAX_MOVEMENT_TIME = 1;
 
     public static int WIDTH = CELLSIZE*BOARD_WIDTH+SIDEBAR;
     public static int HEIGHT = BOARD_WIDTH*CELLSIZE;
+    public static double pieceMovementSpd;
+    public static double maxMovementTime;
 
     protected Tile[][] board;
     protected Piece selPiece;
@@ -49,22 +50,21 @@ public class App extends PApplet {
     public static final int FPS = 60;
     public static int animation = 0;
     public static boolean inAnimation = false;
-    public static final int P_SECONDS = 180;
+    public static int pSeconds;
     private static int pRemainingTime;
-    public static final int P_INCREMENT = 2;
-    public static final int C_SECONDS = 180;
-    public static final int C_INCREMENT = 2;
+    public static int pIncrement;
+    public static int cSeconds;
+    public static int cIncrement;
     private static int cRemainingTime;
     private static String message = "";
     public static int pTick = 0;
     public static int cTick = 0;
 
-
-	
-    public String configPath;
+    public String configPath = "config.json";
+    public JSONObject json;
 
     public App() {
-        this.configPath = "config.json";
+        //reading the config file
         this.board = new Tile[BOARD_WIDTH][BOARD_WIDTH];
         boolean dark;
         for(int i = 0; i < BOARD_WIDTH; i++){
@@ -83,60 +83,60 @@ public class App extends PApplet {
             }
         }
 
-        // placing pieces
-        // Placing rooks
-        board[0][0].updatePiece(new Rook(board[0][0].getX(), board[0][0].getY(), true));
-        board[0][13].updatePiece(new Rook(board[0][13].getX(), board[0][13].getY(), true));
-        board[13][0].updatePiece(new Rook(board[13][0].getX(), board[13][0].getY(), false));
-        board[13][13].updatePiece(new Rook(board[13][13].getX(), board[13][13].getY(), false));
+        // // placing pieces
+        // // Placing rooks
+        // board[0][0].updatePiece(new Rook(board[0][0].getX(), board[0][0].getY(), true));
+        // board[0][13].updatePiece(new Rook(board[0][13].getX(), board[0][13].getY(), true));
+        // board[13][0].updatePiece(new Rook(board[13][0].getX(), board[13][0].getY(), false));
+        // board[13][13].updatePiece(new Rook(board[13][13].getX(), board[13][13].getY(), false));
 
-        // Placing Knights
-        board[0][1].updatePiece(new Knight(board[0][1].getX(), board[0][1].getY(), true));
-        board[0][12].updatePiece(new Knight(board[0][12].getX(), board[0][12].getY(), true));
-        board[13][1].updatePiece(new Knight(board[13][1].getX(), board[13][1].getY(), false));
-        board[13][12].updatePiece(new Knight(board[13][12].getX(), board[13][12].getY(), false));
+        // // Placing Knights
+        // board[0][1].updatePiece(new Knight(board[0][1].getX(), board[0][1].getY(), true));
+        // board[0][12].updatePiece(new Knight(board[0][12].getX(), board[0][12].getY(), true));
+        // board[13][1].updatePiece(new Knight(board[13][1].getX(), board[13][1].getY(), false));
+        // board[13][12].updatePiece(new Knight(board[13][12].getX(), board[13][12].getY(), false));
 
-        // Placing Bishops
-        board[0][2].updatePiece(new Bishop(board[0][2].getX(), board[0][2].getY(), true));
-        board[0][11].updatePiece(new Bishop(board[0][11].getX(), board[0][11].getY(), true));
-        board[13][2].updatePiece(new Bishop(board[13][2].getX(), board[13][2].getY(), false));
-        board[13][11].updatePiece(new Bishop(board[13][11].getX(), board[13][11].getY(), false));
+        // // Placing Bishops
+        // board[0][2].updatePiece(new Bishop(board[0][2].getX(), board[0][2].getY(), true));
+        // board[0][11].updatePiece(new Bishop(board[0][11].getX(), board[0][11].getY(), true));
+        // board[13][2].updatePiece(new Bishop(board[13][2].getX(), board[13][2].getY(), false));
+        // board[13][11].updatePiece(new Bishop(board[13][11].getX(), board[13][11].getY(), false));
 
-        // Placing Archbishops
-        board[0][3].updatePiece(new Archbishop(board[0][3].getX(), board[0][3].getY(), true));
-        board[13][3].updatePiece(new Archbishop(board[13][3].getX(), board[13][3].getY(), false));
+        // // Placing Archbishops
+        // board[0][3].updatePiece(new Archbishop(board[0][3].getX(), board[0][3].getY(), true));
+        // board[13][3].updatePiece(new Archbishop(board[13][3].getX(), board[13][3].getY(), false));
 
-        // Placing Chancellors
-        board[0][10].updatePiece(new Knook(board[0][10].getX(), board[0][10].getY(), true));
-        board[13][10].updatePiece(new Knook(board[13][10].getX(), board[13][10].getY(), false));
+        // // Placing Chancellors
+        // board[0][10].updatePiece(new Knook(board[0][10].getX(), board[0][10].getY(), true));
+        // board[13][10].updatePiece(new Knook(board[13][10].getX(), board[13][10].getY(), false));
 
-        // Placing Camels
-        board[0][4].updatePiece(new Camel(board[0][4].getX(), board[0][4].getY(), true));
-        board[0][9].updatePiece(new Camel(board[0][9].getX(), board[0][9].getY(), true));
-        board[13][4].updatePiece(new Camel(board[13][4].getX(), board[13][4].getY(), false));
-        board[13][9].updatePiece(new Camel(board[13][9].getX(), board[13][9].getY(), false));
+        // // Placing Camels
+        // board[0][4].updatePiece(new Camel(board[0][4].getX(), board[0][4].getY(), true));
+        // board[0][9].updatePiece(new Camel(board[0][9].getX(), board[0][9].getY(), true));
+        // board[13][4].updatePiece(new Camel(board[13][4].getX(), board[13][4].getY(), false));
+        // board[13][9].updatePiece(new Camel(board[13][9].getX(), board[13][9].getY(), false));
 
-        // Placing Generals
-        board[0][5].updatePiece(new General(board[0][5].getX(), board[0][5].getY(), true));
-        board[0][8].updatePiece(new General(board[0][8].getX(), board[0][8].getY(), true));
-        board[13][5].updatePiece(new General(board[13][5].getX(), board[13][5].getY(), false));
-        board[13][8].updatePiece(new General(board[13][8].getX(), board[13][8].getY(), false));
+        // // Placing Generals
+        // board[0][5].updatePiece(new General(board[0][5].getX(), board[0][5].getY(), true));
+        // board[0][8].updatePiece(new General(board[0][8].getX(), board[0][8].getY(), true));
+        // board[13][5].updatePiece(new General(board[13][5].getX(), board[13][5].getY(), false));
+        // board[13][8].updatePiece(new General(board[13][8].getX(), board[13][8].getY(), false));
 
-        // Placing Amazons
-        board[0][6].updatePiece(new Amazon(board[0][6].getX(), board[0][6].getY(), true));
-        board[13][6].updatePiece(new Amazon(board[13][6].getX(), board[13][6].getY(), false));
+        // // Placing Amazons
+        // board[0][6].updatePiece(new Amazon(board[0][6].getX(), board[0][6].getY(), true));
+        // board[13][6].updatePiece(new Amazon(board[13][6].getX(), board[13][6].getY(), false));
 
-        // Placing Kings
-        board[0][7].updatePiece(new King(board[0][7].getX(), board[0][7].getY(), true));
-        bKingPos = board[0][7];
-        board[13][7].updatePiece(new King(board[13][7].getX(), board[13][7].getY(), false));
-        wKingPos = board[13][7];
+        // // Placing Kings
+        // board[0][7].updatePiece(new King(board[0][7].getX(), board[0][7].getY(), true));
+        // bKingPos = board[0][7];
+        // board[13][7].updatePiece(new King(board[13][7].getX(), board[13][7].getY(), false));
+        // wKingPos = board[13][7];
 
-        // Placing Pawns
-        for(int i = 0; i < BOARD_WIDTH; i++){
-            board[1][i].updatePiece(new Pawn(board[1][i].getX(), board[1][i].getY(), true));
-            board[12][i].updatePiece(new Pawn(board[12][i].getX(), board[12][i].getY(), false));
-        }
+        // // Placing Pawns
+        // for(int i = 0; i < BOARD_WIDTH; i++){
+        //     board[1][i].updatePiece(new Pawn(board[1][i].getX(), board[1][i].getY(), true));
+        //     board[12][i].updatePiece(new Pawn(board[12][i].getX(), board[12][i].getY(), false));
+        // }
     }
 
 
@@ -160,21 +160,119 @@ public class App extends PApplet {
 
 		// load config
         JSONObject conf = loadJSONObject(new File(this.configPath));
-        for(int j = 0; j < BOARD_WIDTH; j++){
-            for(int i = 0; i < 2; i++){
-                board[i][j].getHeldPiece().setSprite(this.loadImage(board[i][j].getHeldPiece().getSpriteString()));
-                board[i][j].getHeldPiece().getSprite().resize(48, 0);
+        String layout = conf.getString("layout");
+        JSONObject timeControls = conf.getJSONObject("time_controls");
+        JSONObject player = timeControls.getJSONObject("player");
+        JSONObject cpu = timeControls.getJSONObject("cpu");
+        pSeconds = player.getInt("seconds");
+        pIncrement = player.getInt("increment");
+        cSeconds = cpu.getInt("seconds");
+        cIncrement = cpu.getInt("increment");
+        String playerColour = conf.getString("player_colour");
+        if(playerColour.equals("white")){
+            playerBlack = false;
+        }else{
+            playerBlack = true;
+        }
+        pieceMovementSpd = conf.getDouble("piece_movement_speed");
+        maxMovementTime = conf.getDouble("max_movement_time");
+
+        try{
+            File layoutFile = new File(layout);
+            Scanner scan = new Scanner(layoutFile);
+            String[] layoutRows = new String[14];
+            int j = 0;
+            while(scan.hasNextLine()){
+                String layoutLine = scan.nextLine();
+                int layoutLength = layoutLine.length();
+                if(layoutLength < 14){
+                    for(int i = 0; i < (14 - layoutLength); i++){
+                        layoutLine += " ";
+                    }
+                }else if(layoutLength > 14){
+                    throw new ArithmeticException();
+                }
+                layoutRows[j] = layoutLine;
+                j += 1;
             }
-            for(int i = BOARD_WIDTH - 2; i < BOARD_WIDTH; i++){
-                board[i][j].getHeldPiece().setSprite(this.loadImage(board[i][j].getHeldPiece().getSpriteString()));
-                board[i][j].getHeldPiece().getSprite().resize(48, 0);
+            scan.close();
+            System.out.println(j);
+            if(j < 13){
+                throw new ArithmeticException();
+            }
+            boolean bKing = false;
+            boolean wKing = false;
+            for(int i = 0; i < 14; i++){
+                String rowPieces = layoutRows[i];
+                for(int h = 0; h < 14; h++){
+                    char placePiece = rowPieces.charAt(h);
+                    System.out.println(placePiece);
+                    System.out.println("bruh");
+                    switch(placePiece){
+                        case 'R': board[i][h].updatePiece(new Rook(board[i][h].getX(), board[i][h].getY(), true)); break;
+                        case 'r': board[i][h].updatePiece(new Rook(board[i][h].getX(), board[i][h].getY(), false)); break;
+                        case 'N': board[i][h].updatePiece(new Knight(board[i][h].getX(), board[i][h].getY(), true)); break;
+                        case 'n': board[i][h].updatePiece(new Knight(board[i][h].getX(), board[i][h].getY(), false)); break;
+                        case 'B': board[i][h].updatePiece(new Bishop(board[i][h].getX(), board[i][h].getY(), true)); break;
+                        case 'b': board[i][h].updatePiece(new Bishop(board[i][h].getX(), board[i][h].getY(), false)); break;
+                        case 'H': board[i][h].updatePiece(new Archbishop(board[i][h].getX(), board[i][h].getY(), true)); break;
+                        case 'h': board[i][h].updatePiece(new Archbishop(board[i][h].getX(), board[i][h].getY(), false)); break;
+                        case 'E': board[i][h].updatePiece(new Knook(board[i][h].getX(), board[i][h].getY(), true)); break;
+                        case 'e': board[i][h].updatePiece(new Knook(board[i][h].getX(), board[i][h].getY(), false)); break;
+                        case 'C': board[i][h].updatePiece(new Camel(board[i][h].getX(), board[i][h].getY(), true)); break;
+                        case 'c': board[i][h].updatePiece(new Camel(board[i][h].getX(), board[i][h].getY(), false)); break;
+                        case 'G': board[i][h].updatePiece(new General(board[i][h].getX(), board[i][h].getY(), true)); break;
+                        case 'g': board[i][h].updatePiece(new General(board[i][h].getX(), board[i][h].getY(), false)); break;
+                        case 'A': board[i][h].updatePiece(new Amazon(board[i][h].getX(), board[i][h].getY(), true)); break;
+                        case 'a': board[i][h].updatePiece(new Amazon(board[i][h].getX(), board[i][h].getY(), false)); break;
+                        case 'K': {
+                            board[i][h].updatePiece(new King(board[i][h].getX(), board[i][h].getY(), true)); 
+                            if(bKing){
+                                throw new IllegalArgumentException();
+                            }
+                            bKing = true;
+                            bKingPos = board[i][h];
+                            break;
+                        }
+                        case 'k': {
+                            board[i][h].updatePiece(new King(board[i][h].getX(), board[i][h].getY(), false)); 
+                            if(wKing){
+                                throw new IllegalArgumentException();
+                            }
+                            wKing = true;
+                            wKingPos = board[i][h];
+                            break;
+                        }
+                        case 'P': board[i][h].updatePiece(new Pawn(board[i][h].getX(), board[i][h].getY(), true)); break;
+                        case 'p': board[i][h].updatePiece(new Pawn(board[i][h].getX(), board[i][h].getY(), false)); break;
+                    }
+                }
+            }
+            if(!bKing || !wKing){
+                throw new IllegalArgumentException();
+            }
+
+        }catch(FileNotFoundException e){
+            System.out.println("Layout file not found");
+        }catch(ArithmeticException e){
+            System.out.println("Invalid length of the layout file");
+        }catch(NullPointerException e){
+            System.out.println("Invalid length of the layout file");
+        }catch(IllegalArgumentException e){
+            System.out.println("Error: Invalid number of Kings");
+        }
+        for(int j = 0; j < BOARD_WIDTH; j++){
+            for(int i = 0; i < BOARD_WIDTH; i++){
+                if(board[i][j].getHeldPiece() != null){
+                    board[i][j].getHeldPiece().setSprite(this.loadImage(board[i][j].getHeldPiece().getSpriteString()));
+                    board[i][j].getHeldPiece().getSprite().resize(48, 0);
+                }
             }
         }
 
-        playerBlack = false;
         currentTurn = false;
-        pRemainingTime = P_SECONDS;
-        cRemainingTime = C_SECONDS;
+        pRemainingTime = pSeconds;
+        cRemainingTime = cSeconds;
         if(playerBlack){
             message = "AI's turn...";
         }else{
@@ -341,13 +439,13 @@ public class App extends PApplet {
         double deltaX = destination.getX() - movementPiece.getX();
         double deltaY = destination.getY() - movementPiece.getY();
         double distance = Math.sqrt(Math.pow((deltaX), 2) + Math.pow((deltaY), 2));
-        if((distance / (PIECE_MOVEMENT_SPEED * FPS)) < MAX_MOVEMENT_TIME){
-            framesReq = Math.floorDiv((int)distance, PIECE_MOVEMENT_SPEED);
-            movementX = ((PIECE_MOVEMENT_SPEED/distance) * deltaX);
-            movementY = ((PIECE_MOVEMENT_SPEED/distance) * deltaY);
+        if((distance / (pieceMovementSpd * FPS)) < maxMovementTime){
+            framesReq = Math.floorDiv((int)distance, (int)pieceMovementSpd);
+            movementX = ((pieceMovementSpd/distance) * deltaX);
+            movementY = ((pieceMovementSpd/distance) * deltaY);
         }else{
-            double velocity = distance / FPS * MAX_MOVEMENT_TIME;
-            framesReq = (int)MAX_MOVEMENT_TIME * FPS;
+            double velocity = distance / FPS * maxMovementTime;
+            framesReq = (int)maxMovementTime * FPS;
             movementX = ((velocity/distance) * deltaX);
             movementY = ((velocity/distance) * deltaY);
         }
