@@ -13,6 +13,9 @@ import jogamp.opengl.util.av.JavaSoundAudioSink;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+
+import com.jogamp.newt.event.KeyEvent;
+
 import java.awt.Font;
 import java.io.*;
 import java.util.*;
@@ -20,7 +23,7 @@ import java.lang.Math;
 
 public class App extends PApplet {
 
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     public static final int SPRITESIZE = 480;
     public static final int CELLSIZE = 48;
@@ -37,11 +40,14 @@ public class App extends PApplet {
     protected Tile selTile;
     private Tile destTile;
     private Tile originTile;
+    private Tile prevDest;
+    private Tile prevOrigin;
     private Piece movementPiece;
     private double movementX;
     private double movementY;
     protected boolean playerBlack;
     protected boolean currentTurn = false;
+
     protected static boolean bKingInCheck = false;
     protected static boolean wKingInCheck = false;
     private static boolean gameEnded = false;
@@ -82,61 +88,6 @@ public class App extends PApplet {
                 board[i][j] = new Tile(CELLSIZE, i, j, dark, (Tile.getRowNames(i) + Tile.getColumnNames(j)));
             }
         }
-
-        // // placing pieces
-        // // Placing rooks
-        // board[0][0].updatePiece(new Rook(board[0][0].getX(), board[0][0].getY(), true));
-        // board[0][13].updatePiece(new Rook(board[0][13].getX(), board[0][13].getY(), true));
-        // board[13][0].updatePiece(new Rook(board[13][0].getX(), board[13][0].getY(), false));
-        // board[13][13].updatePiece(new Rook(board[13][13].getX(), board[13][13].getY(), false));
-
-        // // Placing Knights
-        // board[0][1].updatePiece(new Knight(board[0][1].getX(), board[0][1].getY(), true));
-        // board[0][12].updatePiece(new Knight(board[0][12].getX(), board[0][12].getY(), true));
-        // board[13][1].updatePiece(new Knight(board[13][1].getX(), board[13][1].getY(), false));
-        // board[13][12].updatePiece(new Knight(board[13][12].getX(), board[13][12].getY(), false));
-
-        // // Placing Bishops
-        // board[0][2].updatePiece(new Bishop(board[0][2].getX(), board[0][2].getY(), true));
-        // board[0][11].updatePiece(new Bishop(board[0][11].getX(), board[0][11].getY(), true));
-        // board[13][2].updatePiece(new Bishop(board[13][2].getX(), board[13][2].getY(), false));
-        // board[13][11].updatePiece(new Bishop(board[13][11].getX(), board[13][11].getY(), false));
-
-        // // Placing Archbishops
-        // board[0][3].updatePiece(new Archbishop(board[0][3].getX(), board[0][3].getY(), true));
-        // board[13][3].updatePiece(new Archbishop(board[13][3].getX(), board[13][3].getY(), false));
-
-        // // Placing Chancellors
-        // board[0][10].updatePiece(new Knook(board[0][10].getX(), board[0][10].getY(), true));
-        // board[13][10].updatePiece(new Knook(board[13][10].getX(), board[13][10].getY(), false));
-
-        // // Placing Camels
-        // board[0][4].updatePiece(new Camel(board[0][4].getX(), board[0][4].getY(), true));
-        // board[0][9].updatePiece(new Camel(board[0][9].getX(), board[0][9].getY(), true));
-        // board[13][4].updatePiece(new Camel(board[13][4].getX(), board[13][4].getY(), false));
-        // board[13][9].updatePiece(new Camel(board[13][9].getX(), board[13][9].getY(), false));
-
-        // // Placing Generals
-        // board[0][5].updatePiece(new General(board[0][5].getX(), board[0][5].getY(), true));
-        // board[0][8].updatePiece(new General(board[0][8].getX(), board[0][8].getY(), true));
-        // board[13][5].updatePiece(new General(board[13][5].getX(), board[13][5].getY(), false));
-        // board[13][8].updatePiece(new General(board[13][8].getX(), board[13][8].getY(), false));
-
-        // // Placing Amazons
-        // board[0][6].updatePiece(new Amazon(board[0][6].getX(), board[0][6].getY(), true));
-        // board[13][6].updatePiece(new Amazon(board[13][6].getX(), board[13][6].getY(), false));
-
-        // // Placing Kings
-        // board[0][7].updatePiece(new King(board[0][7].getX(), board[0][7].getY(), true));
-        // bKingPos = board[0][7];
-        // board[13][7].updatePiece(new King(board[13][7].getX(), board[13][7].getY(), false));
-        // wKingPos = board[13][7];
-
-        // // Placing Pawns
-        // for(int i = 0; i < BOARD_WIDTH; i++){
-        //     board[1][i].updatePiece(new Pawn(board[1][i].getX(), board[1][i].getY(), true));
-        //     board[12][i].updatePiece(new Pawn(board[12][i].getX(), board[12][i].getY(), false));
-        // }
     }
 
 
@@ -153,10 +104,6 @@ public class App extends PApplet {
     public void setup() {
         frameRate(FPS);
         noStroke();
-
-        // Load images during setup
-
-        // PImage spr = loadImage("src/main/resources/XXLChess/"+...);
 
 		// load config
         JSONObject conf = loadJSONObject(new File(this.configPath));
@@ -196,7 +143,6 @@ public class App extends PApplet {
                 j += 1;
             }
             scan.close();
-            System.out.println(j);
             if(j < 13){
                 throw new ArithmeticException();
             }
@@ -249,7 +195,7 @@ public class App extends PApplet {
             if(!bKing || !wKing){
                 throw new IllegalArgumentException();
             }
-
+        // errors
         }catch(FileNotFoundException e){
             System.out.println("Layout file not found");
             win(4);
@@ -263,6 +209,7 @@ public class App extends PApplet {
             System.out.println("Error: Invalid number of Kings");
             win(4);
         }
+        // loading images defined in the piece classes
         for(int j = 0; j < BOARD_WIDTH; j++){
             for(int i = 0; i < BOARD_WIDTH; i++){
                 if(board[i][j].getHeldPiece() != null){
@@ -287,7 +234,9 @@ public class App extends PApplet {
      * Receive key pressed signal from the keyboard.
     */
     public void keyPressed(){
-
+        if (this.keyCode == 69) {
+            win(3);
+        }
     }
     
     /**
@@ -430,6 +379,12 @@ public class App extends PApplet {
         for(Tile t:attacks){
             t.prevStatus();
         }
+        if(bKingInCheck){
+            bKingPos.updateStatus(5);
+        }
+        if(wKingInCheck){
+            wKingPos.updateStatus(5);
+        }
         this.selTile = null;
     }
 
@@ -437,6 +392,17 @@ public class App extends PApplet {
         movementPiece = origin.getHeldPiece();
         destTile = destination;
         originTile = origin;
+        // Intentionally calling this twice to clear PrevStatus for Tile
+        if(prevOrigin != null){
+            prevOrigin.updateStatus(0);
+            prevOrigin.updateStatus(0);
+        }
+        if(prevDest != null){
+            prevDest.updateStatus(0);
+            prevDest.updateStatus(0);
+        }
+        prevOrigin = originTile;
+        prevDest = destTile;
         int framesReq;
         double deltaX = destination.getX() - movementPiece.getX();
         double deltaY = destination.getY() - movementPiece.getY();
@@ -471,8 +437,6 @@ public class App extends PApplet {
             wKingPos = destTile;
         }
         originTile.updatePiece(null);
-        originTile.updateStatus(0);
-        destTile.updateStatus(0);
         if(movementPiece.getPieceName() == "P" && destTile.getXPos() == 7){
             destTile.updatePiece(new Queen(destTile.getX(), destTile.getY(), true));
             destTile.getHeldPiece().setSprite(this.loadImage(destTile.getHeldPiece().getSpriteString()));
@@ -878,6 +842,8 @@ public class App extends PApplet {
 
 
     public void updateAll(){
+        bKingInCheck = false;
+        wKingInCheck = false;
         for(int i = 0; i < BOARD_WIDTH; i++){
             for(int j = 0; j < BOARD_WIDTH; j++){
                 this.board[i][j].resetMoves();
@@ -904,19 +870,53 @@ public class App extends PApplet {
                 for(Tile t: attacks){
                     if(checkLegal(this.board[i][j], t)){
                         this.board[i][j].addLegalAttacks(t);
+                        if((this.board[i][j].getHeldPiece().isBlack()) && t == wKingPos){
+                            wKingInCheck = true;
+                            wKingPos.updateStatus(5);
+                        }
+                        if(!(this.board[i][j].getHeldPiece().isBlack()) && t == bKingPos){
+                            bKingInCheck = true;
+                            bKingPos.updateStatus(5);
+                        }
                     }
                 }
+            }
+        }
+        if(!wKingInCheck){
+            if(wKingPos == prevDest){
+                wKingPos.updateStatus(2);
+            }else{
+                wKingPos.updateStatus(0);
+            }
+        }
+        if(!bKingInCheck){
+            if(bKingPos == prevDest){
+                bKingPos.updateStatus(2);
+            }else{
+                bKingPos.updateStatus(0);
             }
         }
     }
 
     public void switchTurn(){
         currentTurn = !currentTurn;
-        if(!(playerBlack == currentTurn)){
-            message = "AI's turn...";
-            simpleAi();
-        }else{
-            message = "Player's turn...";
+        ArrayList<Tile[]> possibleMoves = getPossibleMoves();
+        checkWin(possibleMoves);
+        if(possibleMoves.size() != 0){
+            if(!(playerBlack == currentTurn)){
+                if(!(wKingInCheck || bKingInCheck)){
+                    message = "AI's turn...";
+                }else{
+                    message = "Check!";
+                }
+                simpleAi(possibleMoves);
+            }else{
+                if(!(wKingInCheck || bKingInCheck)){
+                    message = "Player's turn...";
+                }else{
+                    message = "Check!";
+                }
+            }
         }
     }
 
@@ -956,18 +956,21 @@ public class App extends PApplet {
             case 2:
                 message = "Stalemate!";
                 break;
+            case 3:
+                message = "You resigned!";
+                break;
             case 4:
                 message = "Error reading config file";
                 break;
         }
     }
 
-    public void simpleAi(){
+    public ArrayList<Tile[]> getPossibleMoves(){
         ArrayList<Tile[]> possibleMoves = new ArrayList<Tile[]>();
         for(int i = 0; i < BOARD_WIDTH; i++){
             for(int j = 0; j < BOARD_WIDTH; j++){
                 if(this.board[i][j].getHeldPiece() != null){
-                    if(this.board[i][j].getHeldPiece().isBlack() != playerBlack){
+                    if(this.board[i][j].getHeldPiece().isBlack() != !currentTurn){
                         ArrayList<Tile> moves = this.board[i][j].getLegalMoves();
                         ArrayList<Tile> attacks = this.board[i][j].getLegalAttacks();
                         for(Tile t:moves){
@@ -982,14 +985,19 @@ public class App extends PApplet {
                 }
             }
         }
-        Random rand = new Random();
-        System.out.println(possibleMoves.size());
+        return possibleMoves;
+    }
+
+    public void checkWin(ArrayList<Tile[]> possibleMoves){
         if(possibleMoves.size() == 0){
             win(0);
-        }else{
-            int n = rand.nextInt(possibleMoves.size());
-            move(possibleMoves.get(n)[0], possibleMoves.get(n)[1]);
         }
+    }
+
+    public void simpleAi(ArrayList<Tile[]> possibleMoves){
+        Random rand = new Random();
+        int n = rand.nextInt(possibleMoves.size());
+        move(possibleMoves.get(n)[0], possibleMoves.get(n)[1]);
     }
 
     public static void main(String[] args) {
